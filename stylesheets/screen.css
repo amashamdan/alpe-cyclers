@@ -29,3 +29,11 @@ body {
   color: white;
   text-decoration: none;
 }
+
+/* To show tick marks and axis (thin) */
+/* line 31, ../sass/screen.scss */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000000;
+}
