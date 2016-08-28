@@ -19,7 +19,7 @@ function plot(data) {
 	var chart = d3.select("#chart-area").append("svg");
 	var height = 600;
 	var width = 800;
-	var padding = 50;
+	var padding = 100;
 	chart.attr("width", width)
 		.attr("height", height)
 		.style("background-color", "rgba(255, 255, 255, 0.5)");
@@ -79,4 +79,19 @@ function plot(data) {
 				return "#AE3C3C";
 			}
 		});
+
+	// Once tried to append names using enter(), for some reason only half the names appear. This is a work around to loop using a for loop and append a text for each point.
+	for (var cycler in data) {
+		chart.append("text")
+			.attr("x", function() {
+				return xScale(data[cycler].timeFromTop) + 7;
+			})
+			.attr("y", function() {
+				return yScale(data[cycler].Place) + 4;
+			})
+			.text(function() {
+				return data[cycler].Name;
+			})
+			.attr("font-size", "0.7em");
+	}
 }
