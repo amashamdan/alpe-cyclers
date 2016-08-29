@@ -33,3 +33,12 @@ body {
     fill: none;
     stroke: #000000;
 }
+
+circle:hover {
+	cursor: pointer;
+}
+
+#infoWindow, .infoText {
+	display: none;
+}
+

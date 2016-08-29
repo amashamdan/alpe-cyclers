@@ -37,3 +37,13 @@ body {
   fill: none;
   stroke: #000000;
 }
+
+/* line 37, ../sass/screen.scss */
+circle:hover {
+  cursor: pointer;
+}
+
+/* line 41, ../sass/screen.scss */
+#infoWindow, .infoText {
+  display: none;
+}
