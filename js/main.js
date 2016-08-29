@@ -30,7 +30,7 @@ function plot(data) {
 
 	var xScale = d3.scale.linear()
 					.domain([0, d3.max(data, function(d) {
-						return d['timeFromTop'] + 10;
+						return d['timeFromTop'] + 10 ;
 					})])
 					.range([width - padding, padding]);
 	var yScale = d3.scale.linear()
@@ -46,11 +46,13 @@ function plot(data) {
 
 	var xAxis = d3.svg.axis()
 					.scale(xScale)
-					.orient("bottom");
+					.orient("bottom")
+
 	chart.append("g")
 		.attr("class", "axis")
 		// brackets around height and padding are important or an error will occur
 		.attr("transform", "translate(0, "+ (height - padding) +")")
+		.attr("id", "time-axis") // id to override time axis
 		.call(xAxis);
 
 	var yAxis = d3.svg.axis()
@@ -123,7 +125,7 @@ function plot(data) {
 	chart.append("text")
 		.attr("x", width / 2)
 		.attr("y", height - padding / 2)
-		.text("Time is seconds behind the record")
+		.text("Time behind the record (in minutes)")
 		.attr("text-anchor", "middle")
 		.attr("font-size", "1.1em")
 
@@ -141,6 +143,19 @@ function plot(data) {
 		.text("For more information about a cyclist, hover over his point.")
 		.attr("text-anchor", "start")
 		.attr("font-size", "0.7em");
+
+	/* X AXIS IN MINUTES */
+	chart.selectAll("#time-axis text").text(function(d) {
+		var minutes = Math.floor(d / 60);
+		if (minutes < 10) {
+			minutes = "0" + minutes;
+		}
+		var seconds = d % 60;
+		if (seconds < 10) {
+			seconds = seconds + "0";
+		}
+		return (minutes + ":" + seconds); 
+	});
 
 	var legendWidth = 180;
 	var legendHeight = 60;
