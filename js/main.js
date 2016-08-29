@@ -22,7 +22,7 @@ function plot(data) {
 	var padding = 100;
 	chart.attr("width", width)
 		.attr("height", height)
-		.style("background-color", "rgba(255, 255, 255, 0.5)");
+		.style("background-color", "rgba(255, 255, 255, 0.8)");
 	for (var cycler in data) {
 		data[cycler].timeFromTop = data[cycler]["Seconds"] - 2210;
 	}
@@ -94,4 +94,72 @@ function plot(data) {
 			})
 			.attr("font-size", "0.7em");
 	}
+
+	chart.append("text")
+		.attr("x", width / 2)
+		.attr("y", padding / 2)
+		.text("Alpe d'Huez Best Times")
+		.attr("text-anchor", "middle")
+		.attr("font-size", "1.4em")
+
+	chart.append("text")
+		.attr("x", width / 2)
+		.attr("y", height - padding / 2)
+		.text("Time is seconds behind the record")
+		.attr("text-anchor", "middle")
+		.attr("font-size", "1.1em")
+
+	chart.append("text")
+		.attr("x", -height / 2)
+		.attr("y", padding / 2)
+		.text("Ranking")
+		.attr("text-anchor", "middle")
+		.attr("font-size", "1.1em")
+		.attr("transform", "rotate(-90)")
+
+	chart.append("text")
+		.attr("x", padding / 2)
+		.attr("y", height - padding / 5)
+		.text("For more information about a cyclist, hover over his point.")
+		.attr("text-anchor", "start")
+		.attr("font-size", "0.7em")
+
+	var legendWidth = 180;
+	var legendHeight = 60;
+	chart.append("rect")
+		.attr("x", width - padding * 2)
+		.attr("y", height / 2 - legendHeight / 2)
+		.attr("width", legendWidth)
+		.attr("height", legendHeight)
+		.attr("rx", 10)
+		.attr("ry", 10)
+		.attr("fill", "rgba(0, 0, 0, 0.8)")
+
+	chart.append("text")
+		.attr("x", width - padding * 2 + 20)
+		.attr("y", height / 2 - legendHeight / 2 + legendHeight / 3)
+		.text("Cyclist has doping allegations.")
+		.attr("text-anchor", "start")
+		.attr("font-size", "0.7em")
+		.attr("fill", "white")
+
+	chart.append("text")
+		.attr("x", width - padding * 2 + 20)
+		.attr("y", height / 2 - legendHeight / 2 + legendHeight / 1.3)
+		.text("Cyclist has a clear record.")
+		.attr("text-anchor", "start")
+		.attr("font-size", "0.7em")
+		.attr("fill", "white")
+
+	chart.append("circle")
+		.attr("cx", width - padding * 2 + 10)
+		.attr("cy", height / 2 - legendHeight / 2 + legendHeight / 3 - 4)
+		.attr("r", 4)
+		.attr("fill", "#AE3C3C")
+
+	chart.append("circle")
+		.attr("cx", width - padding * 2 + 10)
+		.attr("cy", height / 2 - legendHeight / 2 + legendHeight / 1.3 - 4)
+		.attr("r", 4)
+		.attr("fill", "#0F5050")
 }
