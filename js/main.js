@@ -14,6 +14,7 @@ $.ajax ({
 	}
 });
 
+/* This function is called from within AJAX's success method and it draws the chart. */
 function plot(data) {
 	/* Chart is created and given dimension and white transparent background. */
 	var chart = d3.select("#chart-area").append("svg");
@@ -23,27 +24,28 @@ function plot(data) {
 	chart.attr("width", width)
 		.attr("height", height)
 		.style("background-color", "rgba(255, 255, 255, 0.8)");
+	/* Each cyclist has time in seconds, on the chart we want the difference between each cyclist and the top one, and that's calculated here. 2210 is the top cyclist's time. This time difference is stored in a new property 'timeFromTop' */
 	for (var cycler in data) {
 		data[cycler].timeFromTop = data[cycler]["Seconds"] - 2210;
 	}
-	console.log(data);
 
+	/* x-Axis scale is created, it will have the time of each cyclist relative to the top cyclist. */
 	var xScale = d3.scale.linear()
 					.domain([0, d3.max(data, function(d) {
+						// +10 here so we don't start from the origin of the axis.
 						return d['timeFromTop'] + 10 ;
 					})])
+					// Range is reversed to reverse the order of the points.
 					.range([width - padding, padding]);
+
+	/* y-axis scale, also with an offset (this time 3) */
 	var yScale = d3.scale.linear()
 					.domain([1, d3.max(data, function(d) {
 						return d['Place'] + 3;
 					})])
 					.range([padding, height - padding]);
-	var colorScale = d3.scale.linear()
-					.domain([1, d3.max(data, function(d) {
-						return d['Place'];
-					})])
-					.range([0, 255]);
 
+	/* x-axis is created and its properties specified. */
 	var xAxis = d3.svg.axis()
 					.scale(xScale)
 					.orient("bottom")
@@ -52,9 +54,10 @@ function plot(data) {
 		.attr("class", "axis")
 		// brackets around height and padding are important or an error will occur
 		.attr("transform", "translate(0, "+ (height - padding) +")")
-		.attr("id", "time-axis") // id to override time axis
+		.attr("id", "time-axis") // id will be used to override time axis labels
 		.call(xAxis);
 
+	/* x-axis is created and its properties specified. */
 	var yAxis = d3.svg.axis()
 					.scale(yScale)
 					.orient("left");
@@ -63,6 +66,7 @@ function plot(data) {
 		.attr("transform", "translate("+ padding +",0)")
 		.call(yAxis);
 
+	/* Data points are represented with circles which are appended below */
 	chart.selectAll("circle")
 		.data(data)
 		.enter()
@@ -74,13 +78,16 @@ function plot(data) {
 			return yScale(d.Place)
 		})
 		.attr("r", 5)
+		/* fill depends on whether the cyclist has doping allegations or not */
 		.attr("fill", function(d) {
+			// No allegations
 			if (d.Doping == "") {
 				return "#0F5050";
 			} else {
 				return "#AE3C3C";
 			}
 		})
+		/* The following attributes are given to each circle and will be used when the circle is hovered to add information to the infoWindow. */
 		.attr("name", function(d) {
 			return d.Name;
 		})
@@ -115,6 +122,7 @@ function plot(data) {
 			.attr("font-size", "0.7em");
 	}
 
+	/* Chart's label is appended. */
 	chart.append("text")
 		.attr("x", width / 2)
 		.attr("y", padding / 2)
@@ -122,6 +130,7 @@ function plot(data) {
 		.attr("text-anchor", "middle")
 		.attr("font-size", "1.4em");
 
+	/* x-axis label is added. */
 	chart.append("text")
 		.attr("x", width / 2)
 		.attr("y", height - padding / 2)
@@ -129,6 +138,7 @@ function plot(data) {
 		.attr("text-anchor", "middle")
 		.attr("font-size", "1.1em")
 
+	/* y-axis label is added */
 	chart.append("text")
 		.attr("x", -height / 2)
 		.attr("y", padding / 2)
@@ -137,6 +147,7 @@ function plot(data) {
 		.attr("font-size", "1.1em")
 		.attr("transform", "rotate(-90)");
 
+	/* Note on the bottom of the chart is added. */
 	chart.append("text")
 		.attr("x", padding / 2)
 		.attr("y", height - padding / 5)
@@ -144,10 +155,12 @@ function plot(data) {
 		.attr("text-anchor", "start")
 		.attr("font-size", "0.7em");
 
-	/* X AXIS IN MINUTES */
+	/* The method overrides default x-axis labels (seconds) and replaces it with custom labels (time in mm:ss format).
+	the selectAll selects id 'time-axis' which was given to the x-axis, and then select the text of that axis */
 	chart.selectAll("#time-axis text").text(function(d) {
 		var minutes = Math.floor(d / 60);
 		if (minutes < 10) {
+			// Adds 0 digit if the minutes are single digit. 
 			minutes = "0" + minutes;
 		}
 		var seconds = d % 60;
@@ -157,8 +170,10 @@ function plot(data) {
 		return (minutes + ":" + seconds); 
 	});
 
+	/* The following two lines specify the legend box dimensions */
 	var legendWidth = 180;
 	var legendHeight = 60;
+	/* Adds the legend box. */
 	chart.append("rect")
 		.attr("x", width - padding * 2)
 		.attr("y", height / 2 - legendHeight / 2)
@@ -167,7 +182,7 @@ function plot(data) {
 		.attr("rx", 10)
 		.attr("ry", 10)
 		.attr("fill", "rgba(0, 0, 0, 0.8)");
-
+	/* Adds the first entry in the legend box. */
 	chart.append("text")
 		.attr("x", width - padding * 2 + 20)
 		.attr("y", height / 2 - legendHeight / 2 + legendHeight / 3)
@@ -175,7 +190,7 @@ function plot(data) {
 		.attr("text-anchor", "start")
 		.attr("font-size", "0.7em")
 		.attr("fill", "white");
-
+	/* Adds the second entry in the legend box. */
 	chart.append("text")
 		.attr("x", width - padding * 2 + 20)
 		.attr("y", height / 2 - legendHeight / 2 + legendHeight / 1.3)
@@ -183,25 +198,29 @@ function plot(data) {
 		.attr("text-anchor", "start")
 		.attr("font-size", "0.7em")
 		.attr("fill", "white");
-
+	/* Adds symbol in the legend box */
 	chart.append("circle")
 		.attr("cx", width - padding * 2 + 10)
 		.attr("cy", height / 2 - legendHeight / 2 + legendHeight / 3 - 4)
 		.attr("r", 4)
 		.attr("fill", "#AE3C3C");
-
+	/* Adds second symbol in the legend box */
 	chart.append("circle")
 		.attr("cx", width - padding * 2 + 10)
 		.attr("cy", height / 2 - legendHeight / 2 + legendHeight / 1.3 - 4)
 		.attr("r", 4)
 		.attr("fill", "#0F5050");
 
+	/* infoWindow dimensions */
 	var infoWindowHeight = 100;
 	var infoWindowWidth = 150;
 
+	/* jQuery hover function to show and hide infoWindow once a data point is hovered. */
 	$("circle").hover(function(e) {
+		/* The next two lines read the position of the pointer relative to the parent svg. */
 		var xPosition = e.pageX - $("svg").offset().left;
 		var yPosition = e.pageY - $("svg").offset().top;
+		/* Each circle was assigned attributes representing each cyclist's information. these properties are saved in corresponding variables. */
 		var state = $(this).attr("doping");
 		var name = $(this).attr("name");
 		var nationality = $(this).attr("nationality");
@@ -209,22 +228,27 @@ function plot(data) {
 		var time = $(this).attr("time");
 		var year = $(this).attr("year");
 		var doping = $(this).attr("doping");
+		/* The infoWuindow is appended to the chart. */
 		chart.append("rect")
 			.attr("width", infoWindowWidth)
 			.attr("height", infoWindowHeight)
 			.attr("x", xPosition- infoWindowWidth - 10)
 			.attr("y", yPosition - infoWindowHeight)
+			/* rx and ry gives round corners. */
 			.attr("rx", 10)
 			.attr("ry", 10)
 			.attr("fill", function() {
+				/* The color of the infoWindow depends on the doping state of the cyclist. */
 				if (state == "") {
 					return "rgba(15, 80, 80, 0.8)";
 				} else {
 					return "rgba(174, 60, 60, 0.8)";
 				}
 			})
+			/* To control visibility of the infoWindow, it's given an id. */
 			.attr("id", "infoWindow");
 
+		/* The name and nationality of the cyclist are appended. */
 		chart.append("text")
 			.attr("x", xPosition - infoWindowWidth / 2 - 10)
 			.attr("y", yPosition - infoWindowHeight / 1.2)
@@ -234,6 +258,7 @@ function plot(data) {
 			.attr("font-size", "0.7em")
 			.attr("class", "infoText");
 
+		/* The ranking of the cyclist is appended. */
 		chart.append("text")
 			.attr("x", xPosition - infoWindowWidth / 2 - 10)
 			.attr("y", yPosition - infoWindowHeight / 1.5)
@@ -243,6 +268,7 @@ function plot(data) {
 			.attr("font-size", "0.7em")
 			.attr("class", "infoText");
 
+		/* The cyclist's time and year are appended to the infoWindow */
 		chart.append("text")
 			.attr("x", xPosition - infoWindowWidth / 2 - 10)
 			.attr("y", yPosition - infoWindowHeight / 1.95)
@@ -253,15 +279,18 @@ function plot(data) {
 			.attr("class", "infoText");
 
 		/* wrapped text, to have a text wrapped in D3, use D3plus.js library. should append a shape (rect in this case) and then append a text having the same position, then call textwrap function. */
+		/* The rectangle which will wrap the doping text. It's invisible but should be defined to hold the text */
 		chart.append("rect")
 			.attr("x", xPosition - infoWindowWidth - 10)
 			.attr("y", yPosition - infoWindowHeight / 2.3)
 			.attr("width", 150)
 			.attr("height", 50)
 			.attr("fill", "rgba(0, 0, 0, 0)")
+			// A class is used to control visibility.
 			.attr("class", "infoText")
-
+		/* The wrapped text, should have a position within the container.*/
 		chart.append("text")
+			/* id assigned to use with the textwrap method. */
 			.attr("id", "rectResize")
 			.attr("font-size", 12)
 			.attr("fill", "white")
@@ -276,21 +305,18 @@ function plot(data) {
 				}
 			})
 
+		/* The textwrap function, it calls the selected text and wraps it in its container. */
 		d3plus.textwrap()
   		  	.container(d3.select("#rectResize"))
    			.draw();
 
-   		// If it's done in css it doesn't work
+   		// If it's done in css it doesn't work, it is hidden to allow for fading it in.
    		$("#rectResize").hide();
-
 		$("#infoWindow").fadeIn(200);
 		$(".infoText").fadeIn(200);
 		$("#rectResize").fadeIn(200);
-		
+	/* The hover out function. It removes the infoWindow and all its contents. */
 	}, function() {
-		$("#infoWindow").hide();
-		$(".infoText").hide();
-		$("#rectResize").hide();
 		d3.select("#infoWindow").remove();
 		d3.selectAll(".infoText").remove();
 		d3.select("#rectResize").remove();
